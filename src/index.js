@@ -43,19 +43,73 @@ class Board extends React.Component {
   }
 }
 
+/*
+ * A mapping of the number of steps we need to take to go to a
+ * direction. First element represents the horizontal direction and the
+ * second element represents the vertical direction. Positive represents
+ * right for horizontal (and DOWN for vertical). Negative represents left
+ * for horizontal (and UP for vertical).
+ */
+directions = {
+  north: [0, -1],
+  northEast: [1, -1],
+  east: [1, 0],
+  southEast: [1, 1],
+  south: [0, 1],
+  southWest: [-1, 1],
+  west: [-1, 0],
+  northWest: [-1, -1]
+}
+
 class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      history: [{
-        squares: Array(9).fill(null),
-      }],
-      stepNumber: 0,
+      // Arrays of tuples ([rowIndex, columnIndex])
+      moves: {
+        x: [],
+        o: [],
+      },
+      /*
+       * Actually, no. Just keep the simple, one dimentional moves
+       * array, and keep the functions that extract the moves as arrays
+       * of tuples for each player. This is THE RIGHT WAY (TM) of doing
+       * this, as this prevents duplicate, repetitive, unnecessary data
+       * representation. However, if you like better performance, you
+       * can consider _memoizing_ the functions that extract "workable"
+       * data from the "real, condensed data" (which is the simple, one
+       * dimensional moves array).
+       */
       xIsNext: true,
+      gameEnded: false,
     };
   }
 
+  /*
+   * Returns [rowIndex, columnIndex] representation of a regular array
+   * index, where the array represents a matrix (that is, a
+   * two-dimensional array).
+   */
+  getTupleForIndex(index) {
+    const {width} = this.props.boardDimensions;
+    return [Math.floor(index / width), index % width];
+  }
+
+  isGameEnded() {
+    const {moves} = this.state,
+          lastMove = moves[moves.length - 1],
+          lastMoveAsTuple = this.getTupleForIndex(lastMove);
+
+  }
+
   handleClick(i) {
+    const {gameEnded, moves} = this.state;
+    if (gameEnded || i in moves) return;
+    this.setState({
+      moves: [...moves, move],
+      gameEnded: isGameEnded(),
+    });
+
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
@@ -142,6 +196,16 @@ function calculateWinner(squares) {
 // ========================================
 
 ReactDOM.render(
-  <Game />,
+  <Game
+    boardDimensions={{
+      width: 3,
+      height: 3,
+    }}
+    numElementsRequiredForWin={{
+      horizontal: 3,
+      vertical: 3,
+      sequential: 3,
+    }}
+  />,
   document.getElementById('root')
 );
