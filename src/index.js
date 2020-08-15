@@ -63,26 +63,27 @@ directions = {
 
 class Game extends React.Component {
   constructor(props) {
+    this.validateProps();
     super(props);
     this.state = {
-      // Arrays of tuples ([rowIndex, columnIndex])
-      moves: {
-        x: [],
-        o: [],
-      },
-      /*
-       * Actually, no. Just keep the simple, one dimentional moves
-       * array, and keep the functions that extract the moves as arrays
-       * of tuples for each player. This is THE RIGHT WAY (TM) of doing
-       * this, as this prevents duplicate, repetitive, unnecessary data
-       * representation. However, if you like better performance, you
-       * can consider _memoizing_ the functions that extract "workable"
-       * data from the "real, condensed data" (which is the simple, one
-       * dimensional moves array).
-       */
-      xIsNext: true,
+      moves: [],
       gameEnded: false,
     };
+  }
+
+  /*
+   * Check if number of elements required for win is bigger than the
+   * board in any dimension.
+   */
+  validateProps() {
+    if (
+      Math.max(...Object.values(this.props.numElementsRequiredForWin))
+      >
+      Math.min(...Object.values(this.props.boardDimensions))
+    ) {
+      throw new RangeError("Number of elements required to win " +
+                           "cannot be bigger than board dimensions.");
+    }
   }
 
   /*
@@ -204,7 +205,7 @@ ReactDOM.render(
     numElementsRequiredForWin={{
       horizontal: 3,
       vertical: 3,
-      sequential: 3,
+      diagonal: 3,
     }}
   />,
   document.getElementById('root')
