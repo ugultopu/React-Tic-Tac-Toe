@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import util from './util';
 
 function Square(props) {
   return (
@@ -148,77 +149,35 @@ class Game extends React.Component {
   }
 
   validateProps() {
+    const {numElementsRequiredForWin, boardDimensions} = this.props;
     if (
-      Math.max(...Object.values(this.props.numElementsRequiredForWin))
+      Math.max(...Object.values(numElementsRequiredForWin))
       >
-      Math.min(...Object.values(this.props.boardDimensions))
+      Math.min(...Object.values(boardDimensions))
     ) {
       throw new RangeError("Number of elements required to win " +
                            "cannot be bigger than board dimensions.");
     }
   }
 
-  /*
-   * Returns [rowIndex, columnIndex] representation of a regular array
-   * index, where the array represents a matrix (that is, a
-   * two-dimensional array).
-   */
-  getTupleForMove(move) {
-    const {width} = this.props.boardDimensions;
-    return [move % width, Math.floor(move / width)];
-  }
-
-  getPlayerMovesAsTuples(forX = true) {
-    const {moves} = this.state;
-    const movesAsTuples = [];
-    for (let i = forX ? 0 : 1; i < moves.length; i+=2) {
-      movesAsTuples.push(this.getTupleForMove(moves[i]));
-    }
-    return movesAsTuples;
-  }
-
-  isPointValid(point) {
-    const {width, height} = this.props.boardDimensions;
-    return (
-      !(point[0] < 0) && (point[0] < width)
-      &&
-      !(point[1] < 0) && (point[1] < height)
-    );
-  }
-
-  sumArrays(a1, a2, mul) {
-    return a1.map((e, i) => e + mul * a2[i]);
-  }
-
-  doesArrayIncludeSubArray(arrayOfArrays, subArray) {
-    return arrayOfArrays.some(
-             elementArray => subArray.every(
-                               (e, i) => e === elementArray[i]
-                             )
-           );
-  }
-
   checkWin() {
-    const directionToTupleMappings = {
-            horizontal: [1, 0],
-            vertical: [0, 1],
-            diagonal: [1, 1],
-            antiDiagonal: [-1, 1]
-          },
-          lastPlayerMoves = this.getPlayerMovesAsTuples(
-                              this.state.moves.length % 2 !== 0
+    const {moves} = this.state,
+          {numElementsRequiredForWin, boardDimensions} = this.props,
+          lastPlayerMoves = util.board.getPlayerMovesAsTuples(
+                              moves,
+                              boardDimensions,
+                              moves.length % 2 !== 0
                             ),
           lastMove = lastPlayerMoves[lastPlayerMoves.length - 1],
-          {numElementsRequiredForWin} = this.props,
           winningEndpoints = [];
     numElementsRequiredForWin.antiDiagonal
       = numElementsRequiredForWin.diagonal;
     console.log(lastPlayerMoves);
-    for (const direction in directionToTupleMappings) {
-      const delta = directionToTupleMappings[direction],
+    for (const direction in util.board.directionToTupleMappings) {
+      const delta = util.board.directionToTupleMappings[direction],
             targetNumElements = numElementsRequiredForWin[direction],
-            endPoints = [this.sumArrays(lastMove, delta, -1),
-                         this.sumArrays(lastMove, delta, 1)],
+            endPoints = [util.array.sumArrays(lastMove, delta, -1),
+                         util.array.sumArrays(lastMove, delta, 1)],
             finalEndPoints = [];
       let numElements = 1;
       console.log('direction is ' + direction);
@@ -230,11 +189,11 @@ class Game extends React.Component {
         console.log('idx is ' + idx);
         console.log('point is ' + point);
         console.log('multiplier is ' + multiplier);
-        while (this.isPointValid(point)
-            && this.doesArrayIncludeSubArray(lastPlayerMoves, point)
+        while (util.board.isPointValid(point, boardDimensions)
+            && util.array.doesArrayIncludeSubArray(lastPlayerMoves, point)
               ) {
           numElements++;
-          point = this.sumArrays(point, delta, multiplier);
+          point = util.array.sumArrays(point, delta, multiplier);
         }
         console.log('numElements are ' + numElements);
         finalEndPoints[idx] = point;
@@ -243,9 +202,7 @@ class Game extends React.Component {
         winningEndpoints.push(finalEndPoints);
       }
     }
-    this.setState({
-      winningEndpoints
-    });
+    this.setState({winningEndpoints});
   }
 
   isGameEnded() {
@@ -254,8 +211,8 @@ class Game extends React.Component {
   }
 
   handleClick(move) {
-    const {moves, stepNumber} = this.state;
-    const movesUntilStep = moves.slice(0, stepNumber);
+    const {moves, stepNumber} = this.state,
+          movesUntilStep = moves.slice(0, stepNumber);
     if (this.isGameEnded() || movesUntilStep.includes(move)) return;
     this.setState({
       moves: [...movesUntilStep, move],
@@ -264,20 +221,7 @@ class Game extends React.Component {
     }, this.checkWin);
   }
 
-  jumpTo(stepNumber) {
-    this.setState({stepNumber});
-  }
-
-  getSquaresFromMoves() {
-    const {width, height} = this.props.boardDimensions,
-          squares = new Array(width * height).fill(null);
-    let xIsNext = true;
-    for (let i = 0; i < this.state.stepNumber; i++) {
-      squares[this.state.moves[i]] = xIsNext ? 'X' : 'O';
-      xIsNext = !xIsNext;
-    }
-    return squares;
-  }
+  jumpTo(stepNumber) { this.setState({stepNumber}); }
 
   render() {
     return (
@@ -285,7 +229,11 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             boardDimensions={this.props.boardDimensions}
-            squares={this.getSquaresFromMoves()}
+            squares={util.board.getSquaresFromMoves(
+                      this.props.boardDimensions,
+                      this.state.stepNumber,
+                      this.state.moves,
+                    )}
             onClick={i => this.handleClick(i)}
           />
         </div>
