@@ -77,6 +77,62 @@ function Board(props) {
   );
 }
 
+function Status(props) {
+  const {isGameEnded, isStepNumberEven} = props;
+  return (
+    <div>
+      {
+        isGameEnded
+        ?
+        `Winner: ${isStepNumberEven ? 'O' : 'X'}`
+        :
+        `Next player: ${isStepNumberEven ? 'X' : 'O'}`
+      }
+    </div>
+  );
+}
+
+function Step(props) {
+  const {sliceIndex, onClick} = props;
+  return (
+    <li key={sliceIndex}>
+      <button onClick={() => onClick(sliceIndex)}>
+        {
+          sliceIndex
+          ?
+          'Go to move #' + sliceIndex
+          :
+          'Go to game start'
+        }
+      </button>
+    </li>
+  );
+}
+
+function Steps(props) {
+  const {moves, onClick} = props;
+  return (
+    <ol>
+      <Step
+        key={0}
+        sliceIndex={0}
+        onClick={onClick}
+      />
+      {
+        moves.map((_, idx) => {
+          const sliceIndex = idx + 1;
+          return (
+            <Step
+              key={sliceIndex}
+              {...{sliceIndex, onClick}}
+            />
+          );
+        })
+      }
+    </ol>
+  );
+}
+
 class Game extends React.Component {
   constructor(props) {
     super(props);
@@ -224,26 +280,6 @@ class Game extends React.Component {
   }
 
   render() {
-    const {moves, stepNumber} = this.state;
-
-    const movesList = moves.map((_, idx) => {
-      const sliceIndex = idx + 1;
-      return (
-        <li key={sliceIndex}>
-          <button onClick={() => this.jumpTo(sliceIndex)}>
-            {'Go to move #' + sliceIndex}
-          </button>
-        </li>
-      );
-    });
-
-    let status;
-    if (this.isGameEnded()) {
-      status = 'Winner: ' + (moves.length % 2 === 0 ? 'O' : 'X');
-    } else {
-      status = 'Next player: ' + (stepNumber % 2 === 0 ? 'X' : 'O');
-    }
-
     return (
       <div className="game">
         <div className="game-board">
@@ -254,13 +290,14 @@ class Game extends React.Component {
           />
         </div>
         <div className="game-info">
-          <div>{status}</div>
-          <ol>
-            <li key={0}>
-              <button onClick={() => this.jumpTo(0)}>Go to game start</button>
-            </li>
-            {movesList}
-          </ol>
+          <Status
+            isGameEnded={this.isGameEnded()}
+            isStepNumberEven={this.state.stepNumber % 2 === 0}
+          />
+          <Steps
+            moves={this.state.moves}
+            onClick={stepNumber => this.jumpTo(stepNumber)}
+          />
         </div>
       </div>
     );
