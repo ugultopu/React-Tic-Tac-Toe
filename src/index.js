@@ -38,39 +38,17 @@ class Game extends React.Component {
                               boardDimensions,
                               moves.length % 2 !== 0
                             ),
-          lastMove = lastPlayerMoves[lastPlayerMoves.length - 1],
           winningEndpoints = [];
     numElementsRequiredForWin.antiDiagonal
       = numElementsRequiredForWin.diagonal;
-    console.log(lastPlayerMoves);
     for (const direction in util.board.directionToTupleMappings) {
-      const delta = util.board.directionToTupleMappings[direction],
-            targetNumElements = numElementsRequiredForWin[direction],
-            endPoints = [util.array.sumArrays(lastMove, delta, -1),
-                         util.array.sumArrays(lastMove, delta, 1)],
-            finalEndPoints = [];
-      let numElements = 1;
-      console.log('direction is ' + direction);
-      console.log('endPoints are ');
-      console.log(endPoints);
-      for (let idx = 0; idx < endPoints.length; idx++) {
-        let point = endPoints[idx];
-        let multiplier = (idx === 0 ? -1 : 1);
-        console.log('idx is ' + idx);
-        console.log('point is ' + point);
-        console.log('multiplier is ' + multiplier);
-        while (util.board.isPointValid(point, boardDimensions)
-            && util.array.doesArrayIncludeSubArray(lastPlayerMoves, point)
-              ) {
-          numElements++;
-          point = util.array.sumArrays(point, delta, multiplier);
-        }
-        console.log('numElements are ' + numElements);
-        finalEndPoints[idx] = point;
-      }
-      if (numElements === targetNumElements) {
-        winningEndpoints.push(finalEndPoints);
-      }
+      const endpoints = util.board.checkWinForDirection(
+        lastPlayerMoves,
+        numElementsRequiredForWin[direction],
+        boardDimensions,
+        direction
+      );
+      if (endpoints) winningEndpoints.push(endpoints);
     }
     this.setState({winningEndpoints});
   }

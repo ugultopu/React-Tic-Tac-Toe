@@ -57,12 +57,32 @@ function getSquaresFromMoves(boardDimensions, stepNumber, moves) {
   return squares;
 }
 
+function checkWinForDirection(moves, target, boardDimensions, direction) {
+  const delta = directionToTupleMappings[direction],
+        lastMove = moves[moves.length - 1],
+        endPoints = [sumArrays(lastMove, delta, -1),
+                     sumArrays(lastMove, delta, 1)],
+        finalEndPoints = [];
+  let numElements = 1;
+  for (let idx = 0; idx < endPoints.length; idx++) {
+    let point = endPoints[idx],
+        multiplier = (idx === 0 ? -1 : 1);
+    while (isPointValid(point, boardDimensions)
+           && doesArrayIncludeSubArray(moves, point)
+    ) {
+      numElements++;
+      point = sumArrays(point, delta, multiplier);
+    }
+    finalEndPoints[idx] = point;
+  }
+  if (numElements === target) return finalEndPoints;
+}
+
 export default {
-  array: {sumArrays, doesArrayIncludeSubArray},
   board: {
     directionToTupleMappings,
-    isPointValid,
     getPlayerMovesAsTuples,
     getSquaresFromMoves,
+    checkWinForDirection,
   },
 }
