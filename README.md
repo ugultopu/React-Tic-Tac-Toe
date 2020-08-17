@@ -1,7 +1,7 @@
 React Tic Tac Toe
 =================
 
-[Try it here][Live Version]
+## **[Try it here][Live Version]**
 
 [This project][the project] contains my improvements on the [official React tutorial]. Some of them are:
 
