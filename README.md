@@ -3,7 +3,10 @@ React Tic Tac Toe
 
 ## **[Try it here][Live Version]**
 
-[This project][the project] contains my improvements on the [official React tutorial]. Some of them are:
+[This project][the project] contains my improvements on the [official
+React tutorial]. You can [view the code differences][differences from
+official tutorial] between my version and the offical version. Some of
+my improvements are:
 
 - Redesigned the code so that instead of storing the whole board for
   each step, therefore requiring `boardWidth * boardHeight *
@@ -140,4 +143,6 @@ TODO
 
 [Live Version]: https://ugultopu.github.io/React-Tic-Tac-Toe
 [the project]: https://github.com/ugultopu/React-Tic-Tac-Toe
+[differences from official tutorial]:
+https://github.com/ugultopu/React-Tic-Tac-Toe/compare/ugultopu:official-tutorial...master
 [official React tutorial]: https://reactjs.org/tutorial/tutorial.html
