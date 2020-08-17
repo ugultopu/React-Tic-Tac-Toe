@@ -1,68 +1,143 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React Tic Tac Toe
+=================
 
-## Available Scripts
+[Try it here][Live Version]
 
-In the project directory, you can run:
+[This project][the project] contains my improvements on the [official React tutorial]. Some of them are:
 
-### `yarn start`
+- Redesigned the code so that instead of storing the whole board for
+  each step, therefore requiring `boardWidth * boardHeight *
+  numberOfMoves` memory, stored only the list of moves in an array named
+  `moves`. The elements of the `moves` array are indices that represent
+  the squares the move is made on that step.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+  To give an example, let's say that `X` moved `(0,0)`, `O` moved `(1,2)`
+  and `X` moved to `(2,0)`. On the official tutorial's version, this
+  would have been stored as:
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+      history = {
+        ['X',  null, null
+         null, null, null
+         null, null, null],
 
-### `yarn test`
+        ['X',  null, null
+         null, null, null
+         null, 'O',  null],
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+        ['X',  null, 'X',
+         null, null, null
+         null, 'O',  null],
+      }
 
-### `yarn build`
+  In my version, it is stored simply as:
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+      moves = [0, 7, 2]
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+  Since we know that `X` and `O` alternate, all we need to do is to
+  store the indices sequentially. Then, using this information, we can
+  create a representation of the whole board using a function.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Redesign the function that calculates game end / determines the
+  winner. The function in the official tutorial is as follows:
 
-### `yarn eject`
+      function calculateWinner(squares) {
+        const lines = [
+          [0, 1, 2],
+          [3, 4, 5],
+          [6, 7, 8],
+          [0, 3, 6],
+          [1, 4, 7],
+          [2, 5, 8],
+          [0, 4, 8],
+          [2, 4, 6]
+        ];
+        for (let i = 0; i < lines.length; i++) {
+          const [a, b, c] = lines[i];
+          if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+            return squares[a];
+          }
+        }
+        return null;
+      }
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  The problem with it is that:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  - It accommodates only `3x3` boards.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+  - Every single possible winning combination needs to be enumerated.
+    This can be done and placed it in the code as a constant, but it is
+    very wasteful for larger boards because the number of possible
+    combinations drastically increase when we increase the board
+    dimensions.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+  For these reasons, I have completely changed how the winner is
+  calculated. The new algorithm is as follows:
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  - Get the last move from the moves list.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  - Determine which user this last move belongs to. Then, get all moves
+    for that user from the moves list and put them in an array.
 
-### Code Splitting
+  - Map that array to a list of coordinates. That is, for example if
+    that array contained `[2, 5, 7]`, convert it to
+    `[[2,0]],[2,1],[2,2]]`.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+  - The last element of that array is the latest move, since we store
+    the moves sequentially. Observe the fact that if there is a winning
+    combination, it has to contain that last move. Because if not, this
+    means that the game was already over in previous moves, and this
+    logically cannot be possible. Hence, we know for sure that if there
+    is a winner, that winner must contain the last move.
 
-### Analyzing the Bundle Size
+  - Knowing this fact, we check the board:
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+    - Horizontally
+    - Vertically
+    - Diagonally (and anti-diagonally)
 
-### Making a Progressive Web App
+    starting from that last element and going in both directions
+    (up-down, left-right, etc.) for all directions (horizontal,
+    vertical, diagonal). For the full algorithm, you can analyze the
+    code.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+  This way, we can arbitrarily change the board dimensions, as well as
+  the number of elements required to win. That is, in the default Tic
+  Tac Toe, a player needs a sequence of three elements to win, but with
+  this version, the players can configure the board to be, say `10x10`
+  and configure the number of elements required to win are five.
 
-### Advanced Configuration
+- Converted some elements into components to make the code more
+  readable. For example, made `Status` and `Steps` function components
+  of their own and referred to them from the `Game` component.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+TODO
+----
 
-### Deployment
+- Convert the `Board` component into a class component in order to
+  organize the code better. There are a couple functions that would make
+  much sense as a member of a class named `Board` and this way, the code
+  can be much more readable and maintainable.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+- Implement the improvement ideas suggested at the end of the [official
+  React tutorial].
 
-### `yarn build` fails to minify
+- Before starting the game, allow the user to configure the board
+  dimensions and number of elements required to win. In the first
+  iteration, make the UI to configure these simple input boxes. In the
+  second iteration, make it so that the user can hover the cursor and a
+  "ghost" board, along with number indicating the width and height would
+  appear. The user can change the dimensions by moving the mouse and
+  when they are happy, then can either click the left mouse button or
+  press <kbd>Return</kbd> to approve the board dimensions.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+  Similarly for the number of elements required to win, in the first
+  iteration, there would be a simple input box. In the second iteration,
+  after selecting the board dimensions, the number of elements required
+  to win would appear as a "ghost sequence of elements" within the
+  board, and the player would configure the length of this "ghost
+  sequence" with arrow keys.
+
+[Live Version]: https://ugultopu.github.io/React-Tic-Tac-Toe
+[the project]: https://github.com/ugultopu/React-Tic-Tac-Toe
+[official React tutorial]: https://reactjs.org/tutorial/tutorial.html
