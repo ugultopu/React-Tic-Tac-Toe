@@ -78,11 +78,32 @@ function checkWinForDirection(moves, target, boardDimensions, direction) {
   if (numElements === target) return finalEndPoints;
 }
 
+function getWinningEndpoints(
+  moves,
+  numElementsRequiredForWin,
+  boardDimensions
+) {
+  const lastPlayerMoves = getPlayerMovesAsTuples(
+                            moves,
+                            boardDimensions,
+                            moves.length % 2 !== 0
+                          ),
+        winningEndpoints = [];
+  numElementsRequiredForWin.antiDiagonal
+    = numElementsRequiredForWin.diagonal;
+  for (const direction in directionToTupleMappings) {
+    const endpoints = checkWinForDirection(
+      lastPlayerMoves,
+      numElementsRequiredForWin[direction],
+      boardDimensions,
+      direction
+    );
+    if (endpoints) winningEndpoints.push(endpoints);
+  }
+  return winningEndpoints;
+}
+
 export default {
-  board: {
-    directionToTupleMappings,
-    getPlayerMovesAsTuples,
-    getSquaresFromMoves,
-    checkWinForDirection,
-  },
+  getSquaresFromMoves,
+  getWinningEndpoints,
 }

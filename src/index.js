@@ -30,27 +30,16 @@ class Game extends React.Component {
     }
   }
 
-  checkWin() {
+  setWinningEndpoints() {
     const {moves} = this.state,
-          {numElementsRequiredForWin, boardDimensions} = this.props,
-          lastPlayerMoves = util.board.getPlayerMovesAsTuples(
-                              moves,
-                              boardDimensions,
-                              moves.length % 2 !== 0
-                            ),
-          winningEndpoints = [];
-    numElementsRequiredForWin.antiDiagonal
-      = numElementsRequiredForWin.diagonal;
-    for (const direction in util.board.directionToTupleMappings) {
-      const endpoints = util.board.checkWinForDirection(
-        lastPlayerMoves,
-        numElementsRequiredForWin[direction],
-        boardDimensions,
-        direction
-      );
-      if (endpoints) winningEndpoints.push(endpoints);
-    }
-    this.setState({winningEndpoints});
+          {numElementsRequiredForWin, boardDimensions} = this.props;
+    this.setState({
+        winningEndpoints: util.getWinningEndpoints(
+                            moves,
+                            numElementsRequiredForWin,
+                            boardDimensions,
+                          ),
+    });
   }
 
   isGameEnded() {
@@ -64,9 +53,8 @@ class Game extends React.Component {
     if (this.isGameEnded() || movesUntilStep.includes(move)) return;
     this.setState({
       moves: [...movesUntilStep, move],
-      winningEndpoints: [],
       stepNumber: stepNumber + 1,
-    }, this.checkWin);
+    }, this.setWinningEndpoints);
   }
 
   jumpTo(stepNumber) { this.setState({stepNumber}); }
@@ -77,7 +65,7 @@ class Game extends React.Component {
         <div className="game-board">
           <Board
             boardDimensions={this.props.boardDimensions}
-            squares={util.board.getSquaresFromMoves(
+            squares={util.getSquaresFromMoves(
                       this.props.boardDimensions,
                       this.state.stepNumber,
                       this.state.moves,
