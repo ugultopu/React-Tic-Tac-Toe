@@ -43,14 +43,14 @@ class Game extends React.Component {
   }
 
   /*
-  * Returns [rowIndex, columnIndex] representation of a regular array
-  * index, where the array represents a matrix (that is, a
-  * two-dimensional array).
-  */
- getPointForMove(move) {
-  const {width} = this.props.boardDimensions;
-  return [move % width, Math.floor(move / width)];
-}
+   * Returns [rowIndex, columnIndex] representation of a regular array
+   * index, where the array represents a matrix (that is, a
+   * two-dimensional array).
+   */
+  getPointForMove(move) {
+    const {width} = this.props.boardDimensions;
+    return [move % width, Math.floor(move / width)];
+  }
 
   getLastPlayerMovesAsPoints() {
     const {moves} = this.state,
