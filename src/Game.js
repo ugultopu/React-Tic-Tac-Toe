@@ -1,10 +1,10 @@
 import React from 'react';
-import Board from './Board';
-import {Status, Steps} from './components';
+import Board from 'Board';
+import {Status, Steps} from 'components';
 import {
   sumArrays,
   isArrayInArrayOfArrays,
-} from './util';
+} from 'arrayUtils';
 
 class Game extends React.Component {
   constructor(props) {
@@ -122,18 +122,10 @@ class Game extends React.Component {
               ...{
                 boardDimensions,
                 numElementsRequiredForWin,
-                // NOTE: Adding `setWinningEndpoints` like this WILL NOT
-                // WORK. Because doing it this way does not bind `this`
-                // to current object (Game class instance):
-                // setWinningEndpoints
               }
             }
             isGameEnded={this.isGameEnded()}
             addMove={move => this.addMove(move)}
-            // This doesn't work either. Again, the requirement is to
-            // bind `this` to current instance of the Game class:
-            // setWinningEndpoints={setWinningEndpoints}
-            // setWinningEndpoints={endpoints => this.setWinningEndpoints(endpoints)}
           />
         </div>
         <div className="game-info">
