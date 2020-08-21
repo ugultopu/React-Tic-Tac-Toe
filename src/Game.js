@@ -30,8 +30,7 @@ class Game extends React.Component {
     }
   }
 
-  getCurrentMoves(moves, stepNumber) {
-    if (!moves) ({moves, stepNumber} = this.state);
+  getCurrentMoves({moves, stepNumber} = this.state) {
     return moves.slice(0, stepNumber);
   }
 
@@ -106,7 +105,7 @@ class Game extends React.Component {
 
   addMove(move) {
     this.setState(({moves, stepNumber}) => ({
-      moves: [...this.getCurrentMoves(moves, stepNumber), move],
+      moves: [...this.getCurrentMoves({moves, stepNumber}), move],
       stepNumber: stepNumber + 1,
     }))
   }
