@@ -86,7 +86,7 @@ class Game extends React.Component {
   }
 
   // Array of tuples (a tuple is an array of two elements).
-  getWinningEndpoints() {
+  get winningEndpoints() {
     const winningEndpoints = [];
     for (const direction in Board.directionDeltas) {
       const endpoints = this.getWinningEndpointsForDirection(direction);
@@ -101,7 +101,7 @@ class Game extends React.Component {
             &&
             stepNumber === moves.length
             &&
-            this.getWinningEndpoints().length > 0;
+            this.winningEndpoints.length > 0;
   }
 
   addMove(move) {
