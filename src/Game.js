@@ -15,8 +15,6 @@ class Game extends React.Component {
       // represents the game board (that is, a matrix).
       moves: [],
       stepNumber: 0,
-      // Array of tuples (a tuple is an array of two elements).
-      winningEndpoints: [],
     };
   }
 
@@ -35,11 +33,6 @@ class Game extends React.Component {
   getCurrentMoves() {
     const {moves, stepNumber} = this.state;
     return moves.slice(0, stepNumber);
-  }
-
-  isGameEnded() {
-    const {winningEndpoints, stepNumber, moves} = this.state;
-    return winningEndpoints.length > 0 && stepNumber === moves.length;
   }
 
   /*
@@ -92,25 +85,36 @@ class Game extends React.Component {
     if (numElements === target) return endpoints;
   }
 
-  setWinningEndpoints() {
+  // Array of tuples (a tuple is an array of two elements).
+  getWinningEndpoints() {
     const winningEndpoints = [];
     for (const direction in Board.directionDeltas) {
       const endpoints = this.getWinningEndpointsForDirection(direction);
       if (endpoints) winningEndpoints.push(endpoints);
     }
-    this.setState({winningEndpoints});
+    return winningEndpoints;
+  }
+
+  isGameEnded() {
+    const {moves, stepNumber} = this.state;
+    return  moves.length > 0
+            &&
+            stepNumber === moves.length
+            &&
+            this.getWinningEndpoints().length > 0;
   }
 
   addMove(move) {
     this.setState({
       moves: [...this.getCurrentMoves(), move],
       stepNumber: this.state.stepNumber + 1,
-    }, this.setWinningEndpoints);
+    });
   }
 
   jumpTo(stepNumber) { this.setState({stepNumber}); }
 
   render() {
+    // console.log('Rendering Game');
     const {boardDimensions, numElementsRequiredForWin} = this.props;
     numElementsRequiredForWin.antiDiagonal = numElementsRequiredForWin.diagonal;
     return (
