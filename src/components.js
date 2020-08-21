@@ -12,9 +12,9 @@ const Status = ({isGameEnded, isStepNumberEven}) => (
   </div>
 )
 
-const Step = ({sliceIndex, onClick}) => (
+const Step = ({sliceIndex, jumpTo}) => (
   <li key={sliceIndex}>
-    <button onClick={() => onClick(sliceIndex)}>
+    <button onClick={() => jumpTo(sliceIndex)}>
       {
         sliceIndex
         ?
@@ -26,12 +26,12 @@ const Step = ({sliceIndex, onClick}) => (
   </li>
 )
 
-const Steps = ({moves, onClick}) => (
+const Steps = ({moves, jumpTo}) => (
   <ol>
     <Step
       key={0}
       sliceIndex={0}
-      onClick={onClick}
+      jumpTo={jumpTo}
     />
     {
       moves.map((_, idx) => {
@@ -39,7 +39,7 @@ const Steps = ({moves, onClick}) => (
         return (
           <Step
             key={sliceIndex}
-            {...{sliceIndex, onClick}}
+            {...{sliceIndex, jumpTo}}
           />
         );
       })

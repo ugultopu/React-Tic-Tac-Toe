@@ -10,14 +10,14 @@ const Row = ({
   rowIndex,
   width,
   squares,
-  onClick,
+  handleClick,
 }) => (
   <div className="board-row" key={rowIndex}>
     {[...Array(width).keys()].map(colIndex => (
       <Square
         key={colIndex}
         value={squares[colIndex]}
-        onClick={() => onClick(rowIndex * width + colIndex)}
+        onClick={() => handleClick(rowIndex * width + colIndex)}
       />
     ))}
   </div>
@@ -43,7 +43,7 @@ class Board extends React.Component {
     return squares;
   }
 
-  handleClick(move) {
+  handleClick = move => {
     const {moves, isGameEnded, addMove} = this.props;
     if (isGameEnded || moves.includes(move)) return;
     addMove(move);
@@ -64,7 +64,7 @@ class Board extends React.Component {
               rowIndex,
               width,
               squares: squares.slice(rowBegin, rowEnd),
-              onClick: i => this.handleClick(i)
+              handleClick: this.handleClick
             }
           }
         />

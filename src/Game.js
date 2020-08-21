@@ -103,14 +103,14 @@ class Game extends React.Component {
             this.winningEndpoints.length > 0;
   }
 
-  addMove(move) {
+  addMove = move => {
     this.setState(({moves, stepNumber}) => ({
       moves: [...this.getCurrentMoves({moves, stepNumber}), move],
       stepNumber: stepNumber + 1,
     }))
   }
 
-  jumpTo(stepNumber) { this.setState({stepNumber}); }
+  jumpTo = stepNumber => { this.setState({stepNumber}); }
 
   render() {
     // console.log('Rendering Game');
@@ -128,7 +128,7 @@ class Game extends React.Component {
               }
             }
             isGameEnded={this.isGameEnded()}
-            addMove={move => this.addMove(move)}
+            addMove={this.addMove}
           />
         </div>
         <div className="game-info">
@@ -138,7 +138,7 @@ class Game extends React.Component {
           />
           <Steps
             moves={this.state.moves}
-            onClick={stepNumber => this.jumpTo(stepNumber)}
+            jumpTo={this.jumpTo}
           />
         </div>
       </div>
