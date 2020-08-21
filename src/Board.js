@@ -9,14 +9,14 @@ const Square = ({value, onClick}) => (
 const Row = ({
   rowIndex,
   width,
-  squares,
+  values,
   handleClick,
 }) => (
   <div className="board-row" key={rowIndex}>
     {[...Array(width).keys()].map(colIndex => (
       <Square
         key={colIndex}
-        value={squares[colIndex]}
+        value={values[colIndex]}
         onClick={() => handleClick(rowIndex * width + colIndex)}
       />
     ))}
@@ -32,15 +32,17 @@ class Board extends React.Component {
     antiDiagonal: [-1, 1],
   };
 
-  getSquares() {
-    const {boardDimensions: {width, height}, moves} = this.props,
-          squares = new Array(width * height).fill(null);
-    let xIsNext = true;
-    for (let i = 0; i < moves.length; i++) {
-      squares[moves[i]] = xIsNext ? 'X' : 'O';
-      xIsNext = !xIsNext;
+  getValuesForRow(rowIndex) {
+    const {boardDimensions: {width}, moves} = this.props,
+          begin = rowIndex * width,
+          end = begin + width,
+          values = [];
+    for (let i = begin; i < end; i++) {
+      const moveIndex = moves.indexOf(i);
+      if (moveIndex > -1) values.push(moveIndex % 2 === 0 ? 'X' : 'O')
+      else values.push(null);
     }
-    return squares;
+    return values;
   }
 
   handleClick = move => {
@@ -51,11 +53,8 @@ class Board extends React.Component {
 
   render() {
     const {boardDimensions: {width, height}} = this.props,
-          squares = this.getSquares(),
           rows = [];
     for (let rowIndex = 0; rowIndex < height; rowIndex++) {
-      const rowBegin = rowIndex * width,
-            rowEnd = rowBegin + width;
       rows.push(
         <Row
           key={rowIndex}
@@ -63,7 +62,7 @@ class Board extends React.Component {
             ...{
               rowIndex,
               width,
-              squares: squares.slice(rowBegin, rowEnd),
+              values: this.getValuesForRow(rowIndex),
               handleClick: this.handleClick
             }
           }
