@@ -33,21 +33,15 @@ class Board extends React.Component {
   };
 
   getValuesForRow(rowIndex) {
-    const {boardDimensions: {width}, moves} = this.props,
+    const {boardDimensions: {width}, squares} = this.props,
           begin = rowIndex * width,
-          end = begin + width,
-          values = [];
-    for (let i = begin; i < end; i++) {
-      const moveIndex = moves.indexOf(i);
-      if (moveIndex > -1) values.push(moveIndex % 2 === 0 ? 'X' : 'O')
-      else values.push(null);
-    }
-    return values;
+          end = begin + width;
+    return squares.slice(begin, end);
   }
 
   handleClick = move => {
-    const {moves, isGameEnded, addMove} = this.props;
-    if (isGameEnded || moves.includes(move)) return;
+    const {isGameEnded, addMove} = this.props;
+    if (isGameEnded) return;
     addMove(move);
   }
 

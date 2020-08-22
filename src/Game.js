@@ -10,11 +10,14 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.validateProps();
+    const {boardDimensions: {width, height}} = this.props;
     this.state = {
       // Array of indices. The indices refer to an array that
       // represents the game board (that is, a matrix).
       moves: [],
       stepNumber: 0,
+      // NOTE: 'squares' is derived from 'moves'.
+      squares: Array(height * width).fill(null),
     };
   }
 
@@ -30,8 +33,25 @@ class Game extends React.Component {
     }
   }
 
-  getCurrentMoves({moves, stepNumber} = this.state) {
+  static getMovesUntilStep(moves, stepNumber) {
     return moves.slice(0, stepNumber);
+  }
+
+  static getSquaresFromMoves(moves, previousStepNumber, stepNumber, squares) {
+    const beginIndex = previousStepNumber,
+            endIndex = stepNumber;
+    if (endIndex > beginIndex) {
+      const movesToAdd = moves.slice(beginIndex, endIndex);
+      let xIsNext = beginIndex % 2 === 0;
+      for (const move of movesToAdd) {
+        squares[move] = xIsNext ? 'X' : 'O';
+        xIsNext = !xIsNext;
+      }
+    } else {
+      const movesToRemove = moves.slice(endIndex, beginIndex);
+      for (const move of movesToRemove) squares[move] = null;
+    }
+    return squares;
   }
 
   /*
@@ -104,13 +124,23 @@ class Game extends React.Component {
   }
 
   addMove = move => {
-    this.setState(({moves, stepNumber}) => ({
-      moves: [...this.getCurrentMoves({moves, stepNumber}), move],
-      stepNumber: stepNumber + 1,
-    }))
+    this.setState(({moves, stepNumber, squares}) => {
+      if (moves.includes(move)) return;
+      squares[move] = stepNumber % 2 === 0 ? 'X' : 'O';
+      return {
+        moves: [...Game.getMovesUntilStep(moves, stepNumber), move],
+        stepNumber: stepNumber + 1,
+        squares,
+      }
+    })
   }
 
-  jumpTo = stepNumber => { this.setState({stepNumber}); }
+  jumpTo = newStepNumber => {
+    this.setState(({moves, stepNumber, squares}) => ({
+        stepNumber: newStepNumber,
+        squares: Game.getSquaresFromMoves(moves, stepNumber, newStepNumber, squares),
+    }));
+  }
 
   render() {
     // console.log('Rendering Game');
@@ -120,7 +150,7 @@ class Game extends React.Component {
       <div className="game">
         <div className="game-board">
           <Board
-            moves={this.getCurrentMoves()}
+            squares={this.state.squares}
             {
               ...{
                 boardDimensions,
