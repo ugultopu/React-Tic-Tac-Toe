@@ -8,6 +8,10 @@ import {
 
 class Game extends React.Component {
 
+  static isGameEnded(numberOfMoves, stepNumber, numberOfWinningEndpoints) {
+    return stepNumber === numberOfMoves && numberOfWinningEndpoints > 0;
+  }
+
   static getMovesUntilStep(moves, stepNumber) {
     return moves.slice(0, stepNumber);
   }
@@ -127,18 +131,18 @@ class Game extends React.Component {
     }
   }
 
-  isGameEnded() {
-    const {moves, stepNumber, winningEndpoints} = this.state;
-    return stepNumber === moves.length && winningEndpoints.length > 0;
-  }
-
   addMove = move => {
     this.setState((
-      {moves, stepNumber, squares},
+      {moves, stepNumber, squares, winningEndpoints},
       {boardDimensions, numElementsRequiredForWin}
     ) => {
-      const previousMoves = Game.getMovesUntilStep(moves, stepNumber);
-      if (previousMoves.includes(move)) return;
+      const isGameEnded = Game.isGameEnded(
+              moves.length,
+              stepNumber,
+              winningEndpoints.length
+            ),
+            previousMoves = Game.getMovesUntilStep(moves, stepNumber);
+      if (isGameEnded || previousMoves.includes(move)) return;
       moves = [...previousMoves, move];
       squares[move] = stepNumber % 2 === 0 ? 'X' : 'O';
       return {
@@ -170,6 +174,11 @@ class Game extends React.Component {
     // console.log('Rendering Game');
     const {boardDimensions, numElementsRequiredForWin} = this.props;
     numElementsRequiredForWin.antiDiagonal = numElementsRequiredForWin.diagonal;
+    const {
+            moves: {length: numberOfMoves},
+            stepNumber,
+            winningEndpoints: {length: numberOfWinningEndpoints}
+          } = this.state;
     return (
       <div className="game">
         <div className="game-board">
@@ -181,13 +190,16 @@ class Game extends React.Component {
                 numElementsRequiredForWin,
               }
             }
-            isGameEnded={this.isGameEnded()}
             addMove={this.addMove}
           />
         </div>
         <div className="game-info">
           <Status
-            isGameEnded={this.isGameEnded()}
+            isGameEnded={Game.isGameEnded(
+                          numberOfMoves,
+                          stepNumber,
+                          numberOfWinningEndpoints
+                        )}
             isStepNumberEven={this.state.stepNumber % 2 === 0}
           />
           <Steps

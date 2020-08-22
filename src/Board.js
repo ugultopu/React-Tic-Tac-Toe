@@ -39,11 +39,7 @@ class Board extends React.Component {
     return squares.slice(begin, end);
   }
 
-  handleClick = move => {
-    const {isGameEnded, addMove} = this.props;
-    if (isGameEnded) return;
-    addMove(move);
-  }
+  handleClick = move => { this.props.addMove(move); }
 
   render() {
     const {boardDimensions: {width, height}} = this.props,
