@@ -5,14 +5,16 @@ import 'index.css';
 
 ReactDOM.render(
   <Game
-    boardDimensions={{
-      width: 5,
-      height: 7,
-    }}
-    numElementsRequiredForWin={{
-      horizontal: 3,
-      vertical: 3,
-      diagonal: 3,
+    {...{
+      boardDimensions: {
+        width: 5,
+        height: 7,
+      },
+      numElementsRequiredForWin: {
+        horizontal: 3,
+        vertical: 3,
+        diagonal: 3,
+      }
     }}
   />,
   document.getElementById('root')
