@@ -28,12 +28,12 @@ class Game extends React.Component {
     return moves.slice(0, stepNumber);
   }
 
-  static getWinningEndpointsForDirection({
+  static getWinningEndpointsForDirection(
     delta,
     target,
     lastMove,
     squares,
-  }) {
+  ) {
     const player = squares[lastMove[0]][lastMove[1]],
           endpoints = [];
     let numElements = 1;
@@ -49,11 +49,11 @@ class Game extends React.Component {
     if (numElements === target) return endpoints;
   }
 
-  static getWinningEndpoints({
+  static getWinningEndpoints(
     lastMove,
     squares,
     numElementsRequiredForWin
-  }) {
+  ) {
     numElementsRequiredForWin.antiDiagonal = numElementsRequiredForWin.diagonal;
     const directionDeltas = {
             horizontal: [0, 1],
@@ -65,18 +65,23 @@ class Game extends React.Component {
     for (const direction in directionDeltas) {
       const delta = directionDeltas[direction],
             target = numElementsRequiredForWin[direction],
-            endpoints = Game.getWinningEndpointsForDirection({
+            endpoints = Game.getWinningEndpointsForDirection(
                           delta,
                           target,
                           lastMove,
                           squares,
-                        });
+                        );
       if (endpoints) winningEndpoints.push(endpoints);
     }
     return winningEndpoints;
   }
 
-  static getSquaresFromMoves(moves, previousStepNumber, stepNumber, squares) {
+  static getNewSquaresAfterJump(
+    moves,
+    previousStepNumber,
+    stepNumber,
+    squares
+  ) {
     const beginIndex = previousStepNumber,
             endIndex = stepNumber;
     if (endIndex > beginIndex) {
@@ -119,20 +124,21 @@ class Game extends React.Component {
               moves.length,
               stepNumber,
               winningEndpoints.length
-            ),
-            previousMoves = Game.getMovesUntilStep(moves, stepNumber);
-      if (isGameEnded || isArrayInArrayOfArrays(previousMoves, move)) return;
-      moves = [...previousMoves, move];
+            );
+      moves = Game.getMovesUntilStep(moves, stepNumber);
+      if (isGameEnded || isArrayInArrayOfArrays(moves, move)) return;
       squares[move[0]][move[1]] = stepNumber % 2 === 0 ? 'X' : 'O';
+      stepNumber++;
+      moves.push(move);
       return {
         moves,
-        stepNumber: stepNumber + 1,
+        stepNumber,
         squares,
-        winningEndpoints: Game.getWinningEndpoints({
-          lastMove: move,
+        winningEndpoints: Game.getWinningEndpoints(
+          move,
           squares,
           numElementsRequiredForWin,
-        }),
+        ),
       }
     });
   }
@@ -140,7 +146,7 @@ class Game extends React.Component {
   jumpTo = newStepNumber => {
     this.setState(({moves, stepNumber, squares}) => ({
       stepNumber: newStepNumber,
-      squares: Game.getSquaresFromMoves(
+      squares: Game.getNewSquaresAfterJump(
                 moves,
                 stepNumber,
                 newStepNumber,
@@ -163,12 +169,7 @@ class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board
-            {...{
-              squares,
-              addMove,
-            }}
-          />
+          <Board {...{squares, addMove}} />
         </div>
         <div className="game-info">
           <Status
@@ -179,12 +180,7 @@ class Game extends React.Component {
                         )}
             isStepNumberEven={stepNumber % 2 === 0}
           />
-          <Steps
-            {...{
-              moves,
-              jumpTo,
-            }}
-          />
+          <Steps {...{moves, jumpTo}} />
         </div>
       </div>
     );
