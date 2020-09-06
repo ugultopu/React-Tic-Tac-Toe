@@ -1,71 +1,38 @@
 import React from 'react';
 
-const Square = ({value, onClick}) => (
+const Square = ({square, onClick}) => (
   <button className="square" onClick={onClick}>
-    {value}
+    {square}
   </button>
 );
 
-const Row = ({
-  rowIndex,
-  width,
-  values,
-  handleClick,
-}) => (
+const Row = ({rowIndex, row, addMove}) => (
   <div className="board-row" key={rowIndex}>
-    {[...Array(width).keys()].map(colIndex => (
+    {row.map((square, colIndex) => (
       <Square
-        key={colIndex}
-        value={values[colIndex]}
-        onClick={() => handleClick(rowIndex * width + colIndex)}
+        {...{
+          key: colIndex,
+          square,
+          onClick: () => addMove([rowIndex, colIndex]),
+        }}
       />
     ))}
   </div>
 );
 
-class Board extends React.Component {
-
-  static directionDeltas = {
-    horizontal: [1, 0],
-    vertical: [0, 1],
-    diagonal: [1, 1],
-    antiDiagonal: [-1, 1],
-  };
-
-  getValuesForRow(rowIndex) {
-    const {boardDimensions: {width}, squares} = this.props,
-          begin = rowIndex * width,
-          end = begin + width;
-    return squares.slice(begin, end);
-  }
-
-  handleClick = move => { this.props.addMove(move); }
-
-  render() {
-    const {boardDimensions: {width, height}} = this.props,
-          rows = [];
-    for (let rowIndex = 0; rowIndex < height; rowIndex++) {
-      rows.push(
-        <Row
-          key={rowIndex}
-          {
-            ...{
-              rowIndex,
-              width,
-              values: this.getValuesForRow(rowIndex),
-              handleClick: this.handleClick
-            }
-          }
-        />
-      );
-    }
-    return (
-    <div>
-      {rows}
-    </div>
-    );
-  }
-
-}
+const Board = ({squares, addMove}) => (
+  <div>
+    {squares.map((row, rowIndex) => (
+      <Row
+        {...{
+          key: rowIndex,
+          rowIndex,
+          row,
+          addMove,
+        }}
+      />
+    ))}
+  </div>
+);
 
 export default Board;
