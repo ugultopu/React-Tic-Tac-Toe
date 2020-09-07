@@ -24,10 +24,6 @@ class Game extends React.Component {
     return stepNumber === numberOfMoves && numberOfWinningEndpoints > 0;
   }
 
-  static getMovesUntilStep(moves, stepNumber) {
-    return moves.slice(0, stepNumber);
-  }
-
   static getWinningEndpointsForDirection(
     delta,
     target,
@@ -125,7 +121,7 @@ class Game extends React.Component {
               stepNumber,
               winningEndpoints.length
             );
-      moves = Game.getMovesUntilStep(moves, stepNumber);
+      moves = moves.slice(0, stepNumber);
       if (isGameEnded || isArrayInArrayOfArrays(moves, move)) return;
       squares[move[0]][move[1]] = stepNumber % 2 === 0 ? 'X' : 'O';
       stepNumber++;
