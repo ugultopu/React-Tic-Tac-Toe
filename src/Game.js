@@ -31,7 +31,7 @@ class Game extends React.Component {
     squares,
   ) {
     const player = squares[lastMove[0]][lastMove[1]],
-          endpoints = [];
+          endpoints = [lastMove, lastMove];
     let numElements = 1;
     for (let i = 0; i < 2; i++) {
       const multiplier = (i === 0 ? -1 : 1);
