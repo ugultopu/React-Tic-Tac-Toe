@@ -18,7 +18,7 @@ const Status = ({gameEnded, stepNumberEven, itsADraw}) => (
   </div>
 )
 
-const Step = ({sliceIndex, jumpTo, moveSelected}) => (
+const Step = ({move, sliceIndex, jumpTo, moveSelected}) => (
   <li key={sliceIndex}>
     <button
       className={moveSelected ? 'selected-move' : ''}
@@ -27,7 +27,7 @@ const Step = ({sliceIndex, jumpTo, moveSelected}) => (
       {
         sliceIndex
         ?
-        'Go to move #' + sliceIndex
+        `Go to move #${sliceIndex} (${move[0]},${move[1]})`
         :
         'Go to game start'
       }
@@ -44,11 +44,11 @@ const Steps = ({moves, stepNumber, jumpTo}) => {
   moves = [[-1,-1], ...moves];
   return (
     <ol>
-      {moves.map((_, sliceIndex) => (
+      {moves.map((move, sliceIndex) => (
         <Step
           key={sliceIndex}
           moveSelected={stepNumber === sliceIndex}
-          {...{sliceIndex, jumpTo}}
+          {...{move, sliceIndex, jumpTo}}
         />
       ))}
     </ol>
