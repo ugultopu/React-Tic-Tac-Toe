@@ -153,22 +153,21 @@ class Game extends React.Component {
 
   render() {
     const {
-      state: {
-        moves,
-        squares,
-        gameEnded,
-      },
+      state: {moves, squares, stepNumber, gameEnded},
+      props: {boardDimensions: {width, height}},
       addMove,
       jumpTo
     } = this;
-    const stepNumberEven = this.state.stepNumber % 2 === 0;
+    const stepNumberEven = this.state.stepNumber % 2 === 0,
+          itsADraw = stepNumber === moves.length
+                     && moves.length === height * width;
     return (
       <div className="game">
         <div className="game-board">
           <Board {...{squares, addMove}} />
         </div>
         <div className="game-info">
-          <Status {...{gameEnded, stepNumberEven}} />
+          <Status {...{gameEnded, stepNumberEven, itsADraw}} />
           <Steps {...{moves, jumpTo}} />
         </div>
       </div>

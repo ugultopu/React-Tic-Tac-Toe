@@ -1,13 +1,19 @@
 import React from 'react';
 
-const Status = ({gameEnded, stepNumberEven}) => (
+const Status = ({gameEnded, stepNumberEven, itsADraw}) => (
   <div>
     {
       gameEnded
       ?
       `Winner: ${stepNumberEven ? 'O' : 'X'}`
       :
-      `Next player: ${stepNumberEven ? 'X' : 'O'}`
+      (
+        itsADraw
+        ?
+        "It's a draw"
+        :
+        `Next player: ${stepNumberEven ? 'X' : 'O'}`
+      )
     }
   </div>
 )
