@@ -3,7 +3,7 @@ import Board from 'Board';
 import {Status, Steps} from 'components';
 import {
   sumArrays,
-  isArrayInArrayOfArrays,
+  arrayOfArraysIncludesArray,
 } from 'arrayUtils';
 
 class Game extends React.Component {
@@ -18,10 +18,6 @@ class Game extends React.Component {
       throw new RangeError("Number of elements required to win " +
                            "cannot be bigger than board dimensions.");
     }
-  }
-
-  static isGameEnded(numberOfMoves, stepNumber, numberOfWinningEndpoints) {
-    return stepNumber === numberOfMoves && numberOfWinningEndpoints > 0;
   }
 
   static getWinningEndpointsForDirection(
@@ -50,7 +46,6 @@ class Game extends React.Component {
     squares,
     numElementsRequiredForWin
   ) {
-    numElementsRequiredForWin.antiDiagonal = numElementsRequiredForWin.diagonal;
     const directionDeltas = {
             horizontal: [0, 1],
             vertical: [1, 0],
@@ -80,6 +75,7 @@ class Game extends React.Component {
   ) {
     const beginIndex = previousStepNumber,
             endIndex = stepNumber;
+    squares = [...squares];
     if (endIndex > beginIndex) {
       const movesToAdd = moves.slice(beginIndex, endIndex);
       let xIsNext = beginIndex % 2 === 0;
@@ -96,51 +92,54 @@ class Game extends React.Component {
 
   constructor(props) {
     Game.validateProps(props);
+    props.numElementsRequiredForWin.antiDiagonal
+      = props.numElementsRequiredForWin.diagonal;
     super(props);
     const {boardDimensions: {width, height}} = this.props;
     this.state = {
-      // Array of tuples. Each tuple is of form [rowIndex, colIndex],
-      // with the topmost row and leftmost column having indices 0.
+      // Essential state. The elements below cannot be derived from
+      // other state elements.
+      //
+      // 'moves' is an array of tuples. Each tuple is of form [rowIndex,
+      // colIndex], with the topmost row and leftmost column having
+      // indices 0.
       moves: [],
       stepNumber: 0,
-      // NOTE: 'squares' is derived from 'moves'.
+      // Derived state. The elements below can be derived using
+      // essential state elements.
       squares: Array.from(Array(height), () => Array(width).fill(null)),
-      // NOTE: 'winningEndpoints is derived from 'moves. It is an array
-      // of tuples (a tuple is an array of two elements).
       winningEndpoints: [],
+      gameEnded: false,
     };
   }
 
   addMove = move => {
-    this.setState((
-      {moves, stepNumber, squares, winningEndpoints},
-      {numElementsRequiredForWin}
-    ) => {
-      const isGameEnded = Game.isGameEnded(
-              moves.length,
-              stepNumber,
-              winningEndpoints.length
-            );
+    this.setState(({moves, stepNumber, squares, gameEnded}) => {
+      if (gameEnded) return;
       moves = moves.slice(0, stepNumber);
-      if (isGameEnded || isArrayInArrayOfArrays(moves, move)) return;
+      if (arrayOfArraysIncludesArray(moves, move)) return;
+      // I think I need to copy 'squares' to prevent changing game state.
+      squares = [...squares];
       squares[move[0]][move[1]] = stepNumber % 2 === 0 ? 'X' : 'O';
-      stepNumber++;
       moves.push(move);
+      stepNumber++;
+      const winningEndpoints = Game.getWinningEndpoints(
+        move,
+        squares,
+        this.props.numElementsRequiredForWin,
+      );
       return {
         moves,
         stepNumber,
         squares,
-        winningEndpoints: Game.getWinningEndpoints(
-          move,
-          squares,
-          numElementsRequiredForWin,
-        ),
+        winningEndpoints,
+        gameEnded: winningEndpoints.length > 0,
       }
     });
   }
 
   jumpTo = newStepNumber => {
-    this.setState(({moves, stepNumber, squares}) => ({
+    this.setState(({moves, stepNumber, squares, winningEndpoints}) => ({
       stepNumber: newStepNumber,
       squares: Game.getNewSquaresAfterJump(
                 moves,
@@ -148,34 +147,28 @@ class Game extends React.Component {
                 newStepNumber,
                 squares
               ),
+      gameEnded: winningEndpoints.length > 0 && newStepNumber === moves.length
     }));
   }
 
   render() {
     const {
       state: {
-        squares,
-        stepNumber,
         moves,
-        winningEndpoints: {length: numberOfWinningEndpoints}
+        squares,
+        gameEnded,
       },
       addMove,
       jumpTo
     } = this;
+    const stepNumberEven = this.state.stepNumber % 2 === 0;
     return (
       <div className="game">
         <div className="game-board">
           <Board {...{squares, addMove}} />
         </div>
         <div className="game-info">
-          <Status
-            isGameEnded={Game.isGameEnded(
-                          moves.length,
-                          stepNumber,
-                          numberOfWinningEndpoints,
-                        )}
-            isStepNumberEven={stepNumber % 2 === 0}
-          />
+          <Status {...{gameEnded, stepNumberEven}} />
           <Steps {...{moves, jumpTo}} />
         </div>
       </div>

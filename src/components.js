@@ -1,13 +1,13 @@
 import React from 'react';
 
-const Status = ({isGameEnded, isStepNumberEven}) => (
+const Status = ({gameEnded, stepNumberEven}) => (
   <div>
     {
-      isGameEnded
+      gameEnded
       ?
-      `Winner: ${isStepNumberEven ? 'O' : 'X'}`
+      `Winner: ${stepNumberEven ? 'O' : 'X'}`
       :
-      `Next player: ${isStepNumberEven ? 'X' : 'O'}`
+      `Next player: ${stepNumberEven ? 'X' : 'O'}`
     }
   </div>
 )
@@ -26,25 +26,23 @@ const Step = ({sliceIndex, jumpTo}) => (
   </li>
 )
 
-const Steps = ({moves, jumpTo}) => (
-  <ol>
-    <Step
-      key={0}
-      sliceIndex={0}
-      jumpTo={jumpTo}
-    />
-    {
-      moves.map((_, idx) => {
-        const sliceIndex = idx + 1;
-        return (
-          <Step
-            key={sliceIndex}
-            {...{sliceIndex, jumpTo}}
-          />
-        );
-      })
-    }
-  </ol>
-)
+const Steps = ({moves, jumpTo}) => {
+  // Prepend an invalid, dummy move to symbolize the game start.
+  //
+  // WARNING Using 'moves.unshift` instead of the spread operator will
+  // actually change the contents of the moves in the game's state. The
+  // reason is that objects are passed by reference in JavaScript.
+  moves = [[-1,-1], ...moves];
+  return (
+    <ol>
+      {moves.map((_, sliceIndex) => (
+        <Step
+          key={sliceIndex}
+          {...{sliceIndex, jumpTo}}
+        />
+      ))}
+    </ol>
+  );
+}
 
 export {Status, Steps}

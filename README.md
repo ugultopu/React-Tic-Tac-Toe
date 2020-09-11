@@ -117,11 +117,6 @@ my improvements are:
 TODO
 ----
 
-- Convert the `Board` component into a class component in order to
-  organize the code better. There are a couple functions that would make
-  much sense as a member of a class named `Board` and this way, the code
-  can be much more readable and maintainable.
-
 - Implement the improvement ideas suggested at the end of the [official
   React tutorial].
 
