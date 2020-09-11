@@ -168,7 +168,7 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <Status {...{gameEnded, stepNumberEven, itsADraw}} />
-          <Steps {...{moves, jumpTo}} />
+          <Steps {...{moves, stepNumber, jumpTo}} />
         </div>
       </div>
     );

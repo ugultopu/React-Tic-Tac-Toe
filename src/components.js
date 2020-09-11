@@ -18,9 +18,12 @@ const Status = ({gameEnded, stepNumberEven, itsADraw}) => (
   </div>
 )
 
-const Step = ({sliceIndex, jumpTo}) => (
+const Step = ({sliceIndex, jumpTo, moveSelected}) => (
   <li key={sliceIndex}>
-    <button onClick={() => jumpTo(sliceIndex)}>
+    <button
+      className={moveSelected ? 'selected-move' : ''}
+      onClick={() => jumpTo(sliceIndex)}
+    >
       {
         sliceIndex
         ?
@@ -32,7 +35,7 @@ const Step = ({sliceIndex, jumpTo}) => (
   </li>
 )
 
-const Steps = ({moves, jumpTo}) => {
+const Steps = ({moves, stepNumber, jumpTo}) => {
   // Prepend an invalid, dummy move to symbolize the game start.
   //
   // WARNING Using 'moves.unshift` instead of the spread operator will
@@ -44,6 +47,7 @@ const Steps = ({moves, jumpTo}) => {
       {moves.map((_, sliceIndex) => (
         <Step
           key={sliceIndex}
+          moveSelected={stepNumber === sliceIndex}
           {...{sliceIndex, jumpTo}}
         />
       ))}
